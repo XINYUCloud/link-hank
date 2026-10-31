@@ -1,0 +1,30 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: 构建插件包
+        run: |
+          mkdir -p dist/link-hank
+          cp link-hank.php dist/link-hank/
+          cp -r material dist/link-hank/
+          cp LICENSE dist/link-hank/
+          cd dist && zip -r ../link-hank.zip link-hank
+
+      - name: 创建 Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: link-hank.zip
+          generate_release_notes: true

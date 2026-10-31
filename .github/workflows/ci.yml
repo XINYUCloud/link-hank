@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.4', '8.0', '8.1', '8.2', '8.3']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+
+      - name: PHP 语法检查
+        run: |
+          find . -name '*.php' -not -path './vendor/*' -print0 \
+            | xargs -0 -n1 -P4 php -l
+
+  package:
+    name: 构建插件包
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: 打包
+        run: |
+          mkdir -p dist/link-hank
+          cp link-hank.php dist/link-hank/
+          cp -r material dist/link-hank/
+          cp LICENSE dist/link-hank/
+          cd dist && zip -r ../link-hank.zip link-hank
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: link-hank
+          path: link-hank.zip

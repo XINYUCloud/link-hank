@@ -1,0 +1,7 @@
+* text=auto eol=lf
+
+*.php text
+*.css text
+*.js text
+*.md text
+*.zip binary
